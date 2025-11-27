@@ -4,13 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Hawkins Lab: Specimen 002</title>
+    
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
     <style>
+        /* --- CSS STYLING --- */
         body {
-            margin: 0; overflow: hidden; background: #050101;
-            font-family: 'Share Tech Mono', monospace; color: #ff4444;
-            text-shadow: 0 0 5px rgba(255, 0, 0, 0.7); height: 100vh; width: 100vw;
+            margin: 0; 
+            overflow: hidden; 
+            background: #050101;
+            font-family: 'Share Tech Mono', monospace; 
+            color: #ff4444;
+            text-shadow: 0 0 5px rgba(255, 0, 0, 0.7); 
+            height: 100vh; 
+            width: 100vw;
+            /* Hide default cursor */
+            cursor: none; 
         }
+        
+        /* 1. FLASHLIGHT CURSOR */
+        #flashlight-cursor {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            pointer-events: none; /* Let clicks pass through */
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            transition: width 0.1s, height 0.1s;
+        }
+
+        /* 2. ATMOSPHERE OVERLAYS */
         .scanlines {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0.3));
@@ -21,32 +47,58 @@
             background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,1) 100%);
             pointer-events: none; z-index: 19;
         }
-        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; cursor: crosshair; }
+        
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; cursor: none; }
+        
+        /* 3. UI LAYOUT */
         .ui-layer {
-            position: absolute; z-index: 10; pointer-events: none; width: 100%; height: 100%; padding: 40px; box-sizing: border-box;
+            position: absolute; z-index: 10; pointer-events: none; 
+            width: 100%; height: 100%; padding: 40px; box-sizing: border-box;
             border: 2px solid rgba(255, 68, 68, 0.15);
         }
+        
         .location-block { position: absolute; top: 40px; left: 40px; }
         .lab-title { font-size: 22px; letter-spacing: 2px; margin: 0; border-bottom: 1px solid #ff4444; }
         .lab-subtitle { font-size: 14px; opacity: 0.8; margin-top: 8px; display: block; }
+        
         .center-label { position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); text-align: center; opacity: 0.8; }
-        .center-ring { width: 380px; height: 90px; border: 1px dashed rgba(255, 68, 68, 0.15); border-radius: 50%; position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); }
+        
+        /* The Floor Ring */
+        .center-ring { 
+            width: 380px; 
+            height: 90px; 
+            border: 1px dashed rgba(255, 68, 68, 0.15); /* Subtle opacity */
+            border-radius: 50%; 
+            position: absolute; 
+            bottom: 40px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+        }
+        
         .center-text { font-size: 14px; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 20px; display: block; animation: blink 1.5s infinite; }
+        
         .stats-block { position: absolute; bottom: 40px; right: 40px; text-align: right; background: rgba(0, 0, 0, 0.7); padding: 20px; border: 1px solid #ff4444; }
         .creature-name { font-size: 32px; margin: 0 0 10px 0; text-transform: uppercase; color: #fff; }
         .stat-row { font-size: 14px; margin: 5px 0; letter-spacing: 1px; text-transform: uppercase; }
         .stat-value { color: #ff4444; font-weight: bold; margin-left: 10px;}
         .availability { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ff4444; font-size: 16px; color: #fff; }
+        
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
+        
         @media (max-width: 600px) { .ui-layer { padding: 15px; border: none; } .lab-title { font-size: 16px; } .creature-name { font-size: 24px; } .stats-block { bottom: 20px; right: 20px; } }
     </style>
+    
     <script type="importmap">
         { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
     </script>
 </head>
 <body>
+    
+    <div id="flashlight-cursor"></div>
+
     <div class="scanlines"></div>
     <div class="vignette"></div>
+    
     <div class="ui-layer">
         <div class="location-block">
             <h2 class="lab-title">HAWKINS NATIONAL LAB.</h2>
@@ -55,7 +107,7 @@
         </div>
         <div class="center-label">
             <div class="center-ring"></div>
-            <span class="center-text">/// USE FLASHLIGHT TO INSPECT ///</span>
+            <span class="center-text">/// CLICK GLASS TO AGITATE ///</span>
         </div>
         <div class="stats-block">
             <h1 class="creature-name">SPECIMEN: DEMOGORGON</h1>
@@ -65,20 +117,23 @@
             <div class="availability">STATUS: CONTAINED</div>
         </div>
     </div>
+    
     <div id="canvas-container"></div>
+    
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
+        // --- SETUP ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x050101, 0.02); 
+        scene.fog = new THREE.FogExp2(0x050101, 0.03); 
         const clock = new THREE.Clock(); 
 
         // 1. Camera
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
         camera.up.set(0, 0, 1); 
-        camera.position.set(0, -5.5, 1.6);
+        camera.position.set(0, -5.5, 1.6); 
         camera.lookAt(0, 0, 1.2);
 
         // 2. Renderer
@@ -89,23 +144,21 @@
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
-        // 3. LIGHTING (FIXED)
-        // A. Ambient Light (Brighter so model is never invisible)
+        // 3. Lighting
         const hemiLight = new THREE.HemisphereLight(0x333333, 0x111111, 1.5);
         scene.add(hemiLight);
 
-        // B. Rim Light (Red Glow)
         const rimLight = new THREE.SpotLight(0xff0000, 5.0);
         rimLight.position.set(3, 2, 0);
         rimLight.lookAt(0,0,1);
         scene.add(rimLight);
 
-        // C. Flashlight (Wider and Brighter)
-        const flashlight = new THREE.SpotLight(0xaaccff, 15.0); // Very Bright
+        // Cool White Flashlight
+        const flashlight = new THREE.SpotLight(0xaaccff, 15.0); 
         flashlight.position.set(0, -4, 2);
-        flashlight.angle = 0.3; // Narrow beam
-        flashlight.penumbra = 0.3; //Soft edge
-        flashlight.decay = 1.0; // Slower fade
+        flashlight.angle = 0.3; 
+        flashlight.penumbra = 0.2; 
+        flashlight.decay = 1.0;
         flashlight.distance = 25;
         flashlight.castShadow = true;
         scene.add(flashlight);
@@ -121,86 +174,162 @@
         plane.receiveShadow = true;
         scene.add(plane);
 
-        // 5. Loader
+        // --- ANIMATION VARIABLES ---
         let mixer; 
+        let idleAction, attackAction; 
+        let isAttacking = false;
+
+        // --- LOADER ---
         const loader = new GLTFLoader();
         loader.load('./character.glb', (gltf) => {
             const model = gltf.scene;
             model.traverse((n) => { 
-                if(n.isMesh) { 
-                    n.castShadow = true; 
-                    n.receiveShadow = true; 
-                    // Removed manual material override to ensure visibility
-                } 
+                if(n.isMesh) { n.castShadow = true; n.receiveShadow = true; } 
             });
             
             const box = new THREE.Box3().setFromObject(model);
             const center = box.getCenter(new THREE.Vector3());
             model.position.x -= center.x;
             model.position.y -= center.y;
-            //model.position.z -= box.min.z;
-            model.position.z -= 0.0; // Zero offset works for you
+            model.position.z -= box.min.z;
+            model.position.z -= 1.0; // Force height adjustment
 
             pivotGroup.add(model);
 
+            // --- ANIMATION SETUP (FIXED BLINKING) ---
             if (gltf.animations && gltf.animations.length > 0) {
                 mixer = new THREE.AnimationMixer(model);
-                const idleClip = gltf.animations.find(anim => anim.name.toLowerCase().includes('idle'));
-                const action = mixer.clipAction(idleClip || gltf.animations[0]);
-                action.play();
+                
+                // 1. Setup Idle
+                const idleClip = gltf.animations.find(a => a.name.toLowerCase().includes('idle')) || gltf.animations[0];
+                idleAction = mixer.clipAction(idleClip);
+                idleAction.play(); 
+
+                // 2. Setup Attack
+                const attackClip = gltf.animations.find(a => a.name.includes('Attack01_Wipe')) || gltf.animations[1];
+                
+                if(attackClip) {
+                    attackAction = mixer.clipAction(attackClip);
+                    attackAction.setLoop(THREE.LoopOnce); 
+                    
+                    // CRITICAL FIX: Keep the monster visible at the end of the attack
+                    attackAction.clampWhenFinished = true;
+                    
+                    // Logic to Return to Idle
+                    mixer.addEventListener('finished', (e) => {
+                        if (e.action === attackAction) {
+                            // 1. Fade OUT the frozen attack pose (so it doesn't get stuck)
+                            attackAction.fadeOut(0.5);
+                            
+                            // 2. Fade IN the Idle animation
+                            idleAction.reset().fadeIn(0.5).play();
+                            
+                            isAttacking = false;
+                        }
+                    });
+                }
             }
         });
 
-        // 6. Controls
+        // --- INTERACTION ---
         let isDragging = false;
         let previousMouseX = 0;
+        const cursor = document.getElementById('flashlight-cursor');
 
-        container.addEventListener('mousedown', (e) => { isDragging = true; previousMouseX = e.clientX; });
+        // HELPER: Create Glass Crack (Advanced Randomization)
+        function createCrack(x, y) {
+            const crack = document.createElement('img');
+            crack.src = './broken_glass.png'; // Load local file
+            
+            // Random properties
+            const randomSize = 100 + Math.random() * 120; // 100px to 220px
+            const randomRotation = Math.random() * 360;
+            const randomFlip = Math.random() > 0.5 ? 1 : -1;
+
+            crack.style.position = 'absolute';
+            crack.style.left = x + 'px';
+            crack.style.top = y + 'px';
+            
+            crack.style.width = randomSize + 'px';
+            crack.style.height = randomSize + 'px';
+            
+            // Apply Transform
+            crack.style.transform = `translate(-50%, -50%) rotate(${randomRotation}deg) scaleX(${randomFlip})`; 
+            
+            crack.style.pointerEvents = 'none'; 
+            crack.style.zIndex = '5'; 
+            crack.style.opacity = '0.9';
+            
+            document.body.appendChild(crack);
+        }
+
+        // Mouse Events
+        container.addEventListener('mousedown', (e) => { 
+            isDragging = true; 
+            previousMouseX = e.clientX; 
+        });
         
+        container.addEventListener('mouseup', (e) => { 
+            isDragging = false;
+            
+            // If dragging, don't attack. If clicking (short move), ATTACK!
+            // We check if animations are ready and we aren't already attacking
+            if (idleAction && attackAction && !isAttacking) {
+                isAttacking = true;
+                
+                // Switch Animation
+                idleAction.fadeOut(0.2);
+                attackAction.reset().fadeIn(0.2).play();
+
+                // Delay crack to match the animation impact
+                setTimeout(() => {
+                    createCrack(e.clientX, e.clientY);
+                    
+                    // Screen Shake
+                    container.style.transform = "translate(5px, 5px)";
+                    setTimeout(() => container.style.transform = "none", 50);
+                }, 800); 
+            }
+        });
+
         window.addEventListener('mousemove', (e) => {
-            // Flashlight Logic
+            // Update Cursor Visual
+            if(cursor) {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+            }
+
+            // Update Flashlight 3D Target
             const x = (e.clientX / window.innerWidth) * 2 - 1;
             const y = -(e.clientY / window.innerHeight) * 2 + 1;
-            flashlight.target.position.set(x * 3, -1.0, y * 3 + 1.0); // Adjusted target scale
+            flashlight.target.position.set(x * 3, -1.0, y * 3 + 1.0); 
             
-            // Rotation Logic
+            // Update Rotation (if dragging)
             if (isDragging) {
                 const delta = e.clientX - previousMouseX;
                 pivotGroup.rotation.z -= delta * 0.005;
                 previousMouseX = e.clientX;
             }
         });
-        window.addEventListener('mouseup', () => { isDragging = false; });
 
-        // Touch
-        container.addEventListener('touchstart', (e) => { isDragging = true; previousMouseX = e.touches[0].clientX; }, {passive: false});
-        container.addEventListener('touchmove', (e) => {
-            const x = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
-            const y = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
-            flashlight.target.position.set(x * 3, -1.0, y * 3 + 1.0);
-
-            if (isDragging) {
-                e.preventDefault(); 
-                const delta = e.touches[0].clientX - previousMouseX;
-                pivotGroup.rotation.z -= delta * 0.005;
-                previousMouseX = e.touches[0].clientX;
-            }
-        }, {passive: false});
-        container.addEventListener('touchend', () => isDragging = false);
-
+        // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
             const delta = clock.getDelta();
             if (mixer) mixer.update(delta);
-            // Flashlight flicker
-            if (Math.random() > 0.95) { flashlight.intensity = 50.0 + Math.random() * 10.0; }
+            
+            // Flashlight Flicker
+            if (Math.random() > 0.95) { flashlight.intensity = 15.0 + Math.random() * 5.0; }
+            
             renderer.render(scene, camera);
         }
+        
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
+        
         animate();
     </script>
 </body>
