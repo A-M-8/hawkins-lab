@@ -99,15 +99,34 @@
 
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
         
+        /* --- MOBILE SCREEN RULES (Clean Bottom Layout) --- */
         @media (max-width: 768px) {
-            .ui-layer { padding: 15px; border: none; }
-            .stats-block { right: 20px; left: 20px; bottom: 20px; width: auto; max-width: none; padding: 15px; }
-            .creature-name { font-size: 22px; }
-            .stat-row { font-size: 11px; white-space: normal; }
-            .availability { font-size: 13px; }
-            .lab-title { font-size: 16px; }
+            .ui-layer { padding: 0; border: none; }
+            
+            /* Make the Stats Box a full-width bottom bar */
+            .stats-block {
+                right: 0; left: 0; bottom: 0; /* Stick to bottom */
+                width: 100%; max-width: none;
+                padding: 20px 20px 40px 20px; /* Extra padding at bottom */
+                
+                /* Gradient fade instead of a solid box */
+                background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.0));
+                border: none;
+                border-top: 1px solid rgba(255, 68, 68, 0.5);
+                text-align: center; 
+                pointer-events: none; /* Let touches pass through */
+            }
+
+            .creature-name { font-size: 24px; margin-bottom: 8px; }
+            .stat-row { font-size: 12px; display: inline-block; margin: 0 8px; } /* Stats in one line */
+            .availability { font-size: 12px; margin-top: 8px; border: none; color: #ff4444;}
+            
+            .lab-title { font-size: 14px; }
             .location-block { top: 20px; left: 20px; }
-            .center-ring { width: 280px; height: 70px; }
+            
+            /* Hide the large ring on mobile to clean up the view */
+            .center-ring { display: none; }
+            .center-text { display: none; }
         }
     </style>
     
