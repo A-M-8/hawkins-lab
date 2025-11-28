@@ -171,10 +171,25 @@
         scene.fog = new THREE.FogExp2(0x050101, 0.03); 
         const clock = new THREE.Clock(); 
 
+        // 1. Camera Setup (Responsive)
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
         camera.up.set(0, 0, 1); 
-        camera.position.set(0, -5.5, 1.6); 
-        camera.lookAt(0, 0, 1.2);
+
+        // Helper function to set camera based on screen size
+        function updateCameraPosition() {
+            if (window.innerWidth < 768) {
+                // MOBILE: Move back (-7.0) and Look Low (0.5) -> Pushes Model UP
+                camera.position.set(0, -7.0, 1.6);
+                camera.lookAt(0, 0, 0.5); 
+            } else {
+                // DESKTOP: Standard framing
+                camera.position.set(0, -5.5, 1.6);
+                camera.lookAt(0, 0, 1.2);
+            }
+        }
+        
+        // Run immediately
+        updateCameraPosition();
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
