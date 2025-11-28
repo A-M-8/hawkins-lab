@@ -18,7 +18,6 @@
             text-shadow: 0 0 5px rgba(255, 0, 0, 0.7); 
             height: 100vh; 
             width: 100vw;
-            /* Hide default cursor */
             cursor: none; 
         }
         
@@ -30,7 +29,7 @@
             border: 2px solid rgba(255, 255, 255, 0.8);
             border-radius: 50%;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            pointer-events: none; /* Let clicks pass through */
+            pointer-events: none; 
             transform: translate(-50%, -50%);
             z-index: 100;
             transition: width 0.1s, height 0.1s;
@@ -63,11 +62,10 @@
         
         .center-label { position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%); text-align: center; opacity: 0.8; }
         
-        /* The Floor Ring */
         .center-ring { 
             width: 380px; 
             height: 90px; 
-            border: 1px dashed rgba(255, 68, 68, 0.15); /* Subtle opacity */
+            border: 1px dashed rgba(255, 68, 68, 0.15); 
             border-radius: 50%; 
             position: absolute; 
             bottom: 40px; 
@@ -77,15 +75,67 @@
         
         .center-text { font-size: 14px; text-transform: uppercase; letter-spacing: 4px; margin-bottom: 20px; display: block; animation: blink 1.5s infinite; }
         
-        .stats-block { position: absolute; bottom: 40px; right: 40px; text-align: right; background: rgba(0, 0, 0, 0.7); padding: 20px; border: 1px solid #ff4444; }
-        .creature-name { font-size: 32px; margin: 0 0 10px 0; text-transform: uppercase; color: #fff; }
-        .stat-row { font-size: 14px; margin: 5px 0; letter-spacing: 1px; text-transform: uppercase; }
+        /* --- RESPONSIVE STATS BLOCK (UPDATED) --- */
+        .stats-block {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            text-align: right;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 20px;
+            border: 1px solid #ff4444;
+            max-width: 350px; 
+            min-width: 200px;
+            backdrop-filter: blur(2px);
+        }
+
+        .creature-name {
+            font-size: 32px;
+            margin: 0 0 10px 0;
+            text-transform: uppercase;
+            color: #fff;
+            line-height: 1.0;
+        }
+
+        .stat-row {
+            font-size: 14px;
+            margin: 6px 0;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            white-space: nowrap; 
+        }
+
         .stat-value { color: #ff4444; font-weight: bold; margin-left: 10px;}
-        .availability { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #ff4444; font-size: 16px; color: #fff; }
-        
+
+        .availability {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px dashed #ff4444;
+            font-size: 16px;
+            color: #fff;
+        }
+
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
         
-        @media (max-width: 600px) { .ui-layer { padding: 15px; border: none; } .lab-title { font-size: 16px; } .creature-name { font-size: 24px; } .stats-block { bottom: 20px; right: 20px; } }
+        /* --- MOBILE SCREEN RULES --- */
+        @media (max-width: 768px) {
+            .ui-layer { padding: 15px; border: none; }
+            
+            .stats-block {
+                right: 20px; left: 20px; bottom: 20px;
+                width: auto; max-width: none; padding: 15px;
+            }
+
+            .creature-name { font-size: 22px; }
+            .stat-row { font-size: 11px; white-space: normal; }
+            .availability { font-size: 13px; }
+            
+            .lab-title { font-size: 16px; }
+            .location-block { top: 20px; left: 20px; }
+            
+            /* Hide ring on tiny screens to clear view */
+            .center-ring { width: 280px; height: 70px; }
+        }
     </style>
     
     <script type="importmap">
@@ -95,7 +145,6 @@
 <body>
     
     <div id="flashlight-cursor"></div>
-
     <div class="scanlines"></div>
     <div class="vignette"></div>
     
@@ -124,19 +173,16 @@
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-        // --- SETUP ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         scene.fog = new THREE.FogExp2(0x050101, 0.03); 
         const clock = new THREE.Clock(); 
 
-        // 1. Camera
         const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
         camera.up.set(0, 0, 1); 
         camera.position.set(0, -5.5, 1.6); 
         camera.lookAt(0, 0, 1.2);
 
-        // 2. Renderer
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -144,7 +190,6 @@
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
-        // 3. Lighting
         const hemiLight = new THREE.HemisphereLight(0x333333, 0x111111, 1.5);
         scene.add(hemiLight);
 
@@ -153,7 +198,6 @@
         rimLight.lookAt(0,0,1);
         scene.add(rimLight);
 
-        // Cool White Flashlight
         const flashlight = new THREE.SpotLight(0xaaccff, 15.0); 
         flashlight.position.set(0, -4, 2);
         flashlight.angle = 0.3; 
@@ -164,7 +208,6 @@
         scene.add(flashlight);
         scene.add(flashlight.target);
 
-        // 4. Objects
         const pivotGroup = new THREE.Group();
         scene.add(pivotGroup);
 
@@ -174,12 +217,10 @@
         plane.receiveShadow = true;
         scene.add(plane);
 
-        // --- ANIMATION VARIABLES ---
         let mixer; 
         let idleAction, attackAction; 
         let isAttacking = false;
 
-        // --- LOADER ---
         const loader = new GLTFLoader();
         loader.load('./character.glb', (gltf) => {
             const model = gltf.scene;
@@ -192,38 +233,28 @@
             model.position.x -= center.x;
             model.position.y -= center.y;
             model.position.z -= box.min.z;
-            model.position.z -= 1.0; // Force height adjustment
+            model.position.z -= 1.0; 
 
             pivotGroup.add(model);
 
-            // --- ANIMATION SETUP (FIXED BLINKING) ---
             if (gltf.animations && gltf.animations.length > 0) {
                 mixer = new THREE.AnimationMixer(model);
                 
-                // 1. Setup Idle
                 const idleClip = gltf.animations.find(a => a.name.toLowerCase().includes('idle')) || gltf.animations[0];
                 idleAction = mixer.clipAction(idleClip);
                 idleAction.play(); 
 
-                // 2. Setup Attack
                 const attackClip = gltf.animations.find(a => a.name.includes('Attack01_Wipe')) || gltf.animations[1];
                 
                 if(attackClip) {
                     attackAction = mixer.clipAction(attackClip);
                     attackAction.setLoop(THREE.LoopOnce); 
+                    attackAction.clampWhenFinished = true; // FIX: No Blinking
                     
-                    // CRITICAL FIX: Keep the monster visible at the end of the attack
-                    attackAction.clampWhenFinished = true;
-                    
-                    // Logic to Return to Idle
                     mixer.addEventListener('finished', (e) => {
                         if (e.action === attackAction) {
-                            // 1. Fade OUT the frozen attack pose (so it doesn't get stuck)
-                            attackAction.fadeOut(0.5);
-                            
-                            // 2. Fade IN the Idle animation
+                            attackAction.fadeOut(0.5); // FIX: Smooth fade out
                             idleAction.reset().fadeIn(0.5).play();
-                            
                             isAttacking = false;
                         }
                     });
@@ -231,31 +262,24 @@
             }
         });
 
-        // --- INTERACTION ---
         let isDragging = false;
         let previousMouseX = 0;
         const cursor = document.getElementById('flashlight-cursor');
 
-        // HELPER: Create Glass Crack (Advanced Randomization)
         function createCrack(x, y) {
             const crack = document.createElement('img');
-            crack.src = './broken_glass.png'; // Load local file
+            crack.src = './broken_glass.png'; 
             
-            // Random properties
-            const randomSize = 100 + Math.random() * 120; // 100px to 220px
+            const randomSize = 100 + Math.random() * 120;
             const randomRotation = Math.random() * 360;
             const randomFlip = Math.random() > 0.5 ? 1 : -1;
 
             crack.style.position = 'absolute';
             crack.style.left = x + 'px';
             crack.style.top = y + 'px';
-            
             crack.style.width = randomSize + 'px';
             crack.style.height = randomSize + 'px';
-            
-            // Apply Transform
             crack.style.transform = `translate(-50%, -50%) rotate(${randomRotation}deg) scaleX(${randomFlip})`; 
-            
             crack.style.pointerEvents = 'none'; 
             crack.style.zIndex = '5'; 
             crack.style.opacity = '0.9';
@@ -263,7 +287,6 @@
             document.body.appendChild(crack);
         }
 
-        // Mouse Events
         container.addEventListener('mousedown', (e) => { 
             isDragging = true; 
             previousMouseX = e.clientX; 
@@ -271,21 +294,13 @@
         
         container.addEventListener('mouseup', (e) => { 
             isDragging = false;
-            
-            // If dragging, don't attack. If clicking (short move), ATTACK!
-            // We check if animations are ready and we aren't already attacking
             if (idleAction && attackAction && !isAttacking) {
                 isAttacking = true;
-                
-                // Switch Animation
                 idleAction.fadeOut(0.2);
                 attackAction.reset().fadeIn(0.2).play();
 
-                // Delay crack to match the animation impact
                 setTimeout(() => {
                     createCrack(e.clientX, e.clientY);
-                    
-                    // Screen Shake
                     container.style.transform = "translate(5px, 5px)";
                     setTimeout(() => container.style.transform = "none", 50);
                 }, 800); 
@@ -293,18 +308,15 @@
         });
 
         window.addEventListener('mousemove', (e) => {
-            // Update Cursor Visual
             if(cursor) {
                 cursor.style.left = e.clientX + 'px';
                 cursor.style.top = e.clientY + 'px';
             }
 
-            // Update Flashlight 3D Target
             const x = (e.clientX / window.innerWidth) * 2 - 1;
             const y = -(e.clientY / window.innerHeight) * 2 + 1;
             flashlight.target.position.set(x * 3, -1.0, y * 3 + 1.0); 
             
-            // Update Rotation (if dragging)
             if (isDragging) {
                 const delta = e.clientX - previousMouseX;
                 pivotGroup.rotation.z -= delta * 0.005;
@@ -312,15 +324,11 @@
             }
         });
 
-        // --- ANIMATION LOOP ---
         function animate() {
             requestAnimationFrame(animate);
             const delta = clock.getDelta();
             if (mixer) mixer.update(delta);
-            
-            // Flashlight Flicker
             if (Math.random() > 0.95) { flashlight.intensity = 15.0 + Math.random() * 5.0; }
-            
             renderer.render(scene, camera);
         }
         
